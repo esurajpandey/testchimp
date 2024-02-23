@@ -1,0 +1,35 @@
+import { json } from 'stream/consumers';
+// function a () {
+
+//     console.log(1)
+
+//     setTimeout(() => console.log('a'), 1000);
+
+//     setTimeout(() => console.log('b'), 1000);
+
+//     console.log(2)
+// }
+
+// const res = new Promise((resolve,reject)=>{
+//     console.log(1)
+//     setTimeout(()=>{
+//         resolve("a")
+//     },1000)
+// })
+
+// res.then(d => console.log(d)).then(data => console.log("b")).then(data => console.log(2));
+
+
+
+// api.get('/asas', () => {
+//     ...
+//     ...
+//     .... // throwing 500 error
+// })
+
+//process
+//setErrorHandle
+//inbulit methods in express
+//hashing
+
+

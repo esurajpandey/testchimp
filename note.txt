@@ -1,0 +1,59 @@
+//change loging response data 
+    if user === admin | owner 
+        then send whole details
+    
+    else if user === recruiter 
+        then 
+            send : myprofile,notification,team details,plan & bills
+    else if user === hiring manager
+        then 
+            send :  myprofile, notification, plan & bills
+
+
+//Assessment API
+- TestGorilla/assessment-service
+    1. /assessments - create/get(id,name)
+    2. /assessments/:assessmentId/tests/:testId --put,delete :- adding , deleting test from assessment
+    3. /assessments/:assessmentId/:questions/:questionId -put,delete - adding or deleting custom questions to assessments
+    4. /assessments/active/:{key} - get - active or inactive assessment
+
+    5. /job-roles/ - get - (id,name,isTemplate)
+    6. /job-roles/:id - jobrole with template details
+    7. /template/job-role/:jobRoleId - for getting template details
+
+    8. /languages - get all
+    9. /tests/:limit -  get
+    10. /tests/type/:typeId/:limit - get
+    11. /tests/search - 
+
+    12. /questions/my-library 
+    13. /questions/:limit - TestGorilla
+    14. /questions/search
+    15. /questions/assessment/:assessmentId
+    16. /questions/type
+    17. 
+
+
+1. Exam
+    step1 - name and keep posted and return assessment details with company details
+        - company name
+        - number of test and custom question and approx time
+
+    setp2- need customer id for update
+            - setting assessibility
+                - fluent english
+                - isAbnormal
+    step3- Check camera details
+    setp4-send practice question
+    step5- after finishing practise question - send actual question
+
+    step6- take feedback of candidate 
+            Feedback - about the test 
+                testMeasurement - Yes,Somewhat,No
+                description
+    step7- another Test
+
+
+NOte - If user is completed one test We need to send 
+    No of test completed 
+    eg : 1 out of 4

@@ -1,0 +1,531 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_LOCAL")
+}
+
+//User
+model User {
+  id          String  @id @default(uuid())
+  firstName   String?
+  lastName    String?
+  email       String  @unique
+  phoneNumber String? @unique
+
+  language   Language? @relation(fields: [languageId], references: [id])
+  languageId String?
+
+  password       String?
+  token          String        @default("")
+  jobTitle       String?
+  role           Role?         @relation(fields: [roleId], references: [id])
+  roleId         String?
+  setting        Notification? @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  notificationId String?       @unique
+
+  team   Team?   @relation(fields: [teamId], references: [id])
+  teamId String?
+
+  @@index([email, id])
+}
+
+//notification settings
+model Notification {
+  id               String  @id @default(uuid())
+  emailUpdate      Boolean @default(false)
+  candidateAlert   Boolean @default(false)
+  candidateSummary Boolean @default(false)
+  user             User?
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  User      User[]
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?  @unique
+
+  assessmentSetting    Assessment_setting? @relation(fields: [assessment_settingId], references: [id])
+  assessment_settingId String?             @unique
+
+  applicant_tracking  ApplicantTracking? @relation(fields: [applicantTrackingId], references: [id])
+  applicantTrackingId String?
+
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String?       @unique
+  assessment     Assessment[]
+  candidate      Candidate[]
+}
+
+model ApplicantTracking {
+  id   String @id @default(uuid())
+  name String @unique
+  team Team[]
+}
+
+//one team--one company
+model Company {
+  id            String  @id @default(uuid())
+  name          String?
+  color         String?
+  country       String?
+  logo          String?
+  employeeRange String?
+  planToHire    String?
+  Team          Team?
+}
+
+model Assessment_setting {
+  id                  String   @id @default(uuid())
+  feedback            Boolean? @default(true)
+  redirect_candidate  Boolean? @default(true)
+  demographic_details Boolean? @default(false)
+  Team                Team? //one to one
+}
+
+model Role {
+  id   String   @id @default(uuid())
+  type RoleType @unique
+  code Int
+  User User[] //one role - many user
+}
+
+model Plan {
+  id                                   String         @id @default(uuid())
+  name                                 String
+  description                          String?
+  candidate_count                      Int?
+  additional_candidate_price           Int?
+  assessment_count                     Int?
+  additional_assessment_price          Int?
+  test_count_per_assessment            Int?
+  custom_question_count_per_assessment Int?
+  user_count                           Int?
+  price                                Float?
+  duration                             Int?
+  Subscription                         Subscription[]
+}
+
+model Subscription {
+  id           String   @id @default(uuid())
+  startingDate DateTime
+  endDate      DateTime
+  plan         Plan     @relation(fields: [planId], references: [id])
+  planId       String
+  team         Team?
+  newOrderId   String?
+  receipt      Receipt? @relation(fields: [receiptId], references: [id])
+  receiptId    String?  @unique
+}
+
+model Receipt {
+  id           String        @id @default(uuid())
+  orderId      String?
+  paymentId    String?
+  amount       String?
+  date         DateTime?
+  subscription Subscription?
+}
+
+model CountryCode {
+  id   String @id @default(uuid())
+  code String
+  name String
+}
+
+enum RoleType {
+  OWNER
+  RECRUITER
+  ADMIN
+  HIRING_MANAGER
+}
+
+//Second part =============== ASSESSMENT =================
+
+model Assessment {
+  id         String   @id @default(uuid())
+  name       String
+  extraTime  Int?
+  isArchived Boolean? @default(false)
+
+  isAccomodationForNonFluent Boolean?
+  isAccomodationForAbnormal  Boolean?
+  isAntiCheatingEnabled      Boolean?
+  isEditable                 Boolean? @default(false)
+
+  createAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  language   Language @relation(fields: [languageId], references: [id])
+  languageId String
+  jobRole    JobRole  @relation(fields: [jobRoleId], references: [id])
+  jobRoleId  String
+
+  AssessmentTest      AssessmentTest[]
+  CandidateAssessment CandidateAssessment[]
+  AssessmentQuestion  AssessmentQuestion[]
+
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+}
+
+model Language {
+  id         String       @id @default(uuid())
+  name       String
+  Assessment Assessment[]
+  Test       Test[]
+  User       User[]
+}
+
+model JobRole {
+  id                   String              @id @default(uuid())
+  name                 String
+  hasTemplate          Boolean
+  Assessment           Assessment[]
+  template             AssessmentTemplate? @relation(fields: [assessmentTemplateId], references: [id])
+  assessmentTemplateId String?             @unique
+  Test                 Test[]
+}
+
+model AssessmentTemplate {
+  id          String   @id @default(uuid())
+  JobRole     JobRole?
+  description String
+}
+
+model Test {
+  id               String   @id @default(uuid())
+  title            String
+  duration         String
+  shortDescription String?
+  longDescription  String?
+  isPremium        Boolean  @default(false)
+  createAt         DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  audience         String?
+  relevance        String?
+
+  testType    TestType  @relation(fields: [testTypeId], references: [id])
+  testTypeId  String
+  owner       TestOwner @relation(fields: [testOwnerId], references: [id])
+  testOwnerId String
+  testLevel   TestLevel @relation(fields: [testLevelId], references: [id])
+  testLevelId String
+
+  language   Language? @relation(fields: [languageId], references: [id])
+  languageId String?
+
+  jobRole   JobRole? @relation(fields: [jobRoleId], references: [id])
+  jobRoleId String?
+
+  TestQuestions  TestQuestions[]
+  AssessmentTest AssessmentTest[]
+  coveredSkills  String[]
+  TestAnswer     TestAnswer[]
+}
+
+model TestOwner {
+  id      String  @id @default(uuid())
+  name    String
+  bio     String?
+  profile String?
+  Test    Test[]
+}
+
+model TestQuestions {
+  tests      Test     @relation(fields: [testId], references: [id])
+  testId     String
+  questions  Question @relation(fields: [questionId], references: [id])
+  questionId String
+
+  @@id([testId, questionId])
+}
+
+model TestType {
+  id    String @id @default(uuid())
+  title String
+  Test  Test[]
+}
+
+model AssessmentTest {
+  assessments  Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId String
+  tests        Test       @relation(fields: [testId], references: [id])
+  testId       String
+
+  @@id([testId, assessmentId])
+}
+
+model AssessmentQuestion {
+  assessments  Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId String
+  questions    Question   @relation(fields: [questionId], references: [id])
+  questionId   String
+
+  @@id([questionId, assessmentId])
+}
+
+model TestLevel {
+  id    String @id @default(uuid())
+  level String
+  Test  Test[]
+}
+
+model Category {
+  id                String               @id @default(uuid())
+  name              String
+  type              CategoryType
+  QuestionCategorie QuestionCategories[]
+}
+
+enum CategoryType {
+  ROLE
+  GENERAL
+}
+
+model QuestionCategories {
+  questions  Question @relation(fields: [questionId], references: [id])
+  questionId String
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([categoryId, questionId])
+}
+
+enum QuestionSource {
+  TestGorilla
+  UserLibraray
+}
+
+model Question {
+  id          String  @id @default(uuid())
+  duration    String
+  title       String? //not for candidate
+  heading     String?
+  description String? //heading question 
+
+  source QuestionSource?
+
+  isPremium Boolean? @default(false)
+  isSample  Boolean? @default(false)
+
+  lookingForAsnwer String?
+  questionRelevant String?
+
+  tests       TestQuestions[]
+  assessments AssessmentQuestion[]
+
+  type           QuestionType @relation(fields: [questionTypeId], references: [id])
+  questionTypeId String
+
+  mcq   MCQ?    @relation(fields: [mCQId], references: [id])
+  mCQId String? @unique
+
+  coding   Coding? @relation(fields: [codingId], references: [id])
+  codingId String? @unique
+
+  QuestionCategories QuestionCategories[]
+  QuestionAnswer     QuestionAnswer[]
+}
+
+enum Type {
+  VIDEO
+  MCQ
+  ESSAY
+  FILE
+  CODING
+}
+
+model QuestionType {
+  id        String     @id @default(uuid())
+  title     Type       @unique
+  questions Question[]
+}
+
+model MCQ {
+  id        String    @id @default(uuid())
+  isShuffle Boolean   @default(false)
+  options   String[]
+  answer    String
+  Question  Question?
+}
+
+model Coding {
+  id        String      @id @default(uuid())
+  note      String?
+  question  Question?
+  TestCases TestCases[]
+}
+
+model TestCases {
+  id       String @id @default(uuid())
+  input    String
+  output   String
+  coding   Coding @relation(fields: [codingId], references: [id])
+  codingId String
+}
+
+//Candidate module==================================================================||
+
+model Candidate {
+  id        String @id @default(uuid())
+  firstName String
+  lastName  String
+
+  email    String
+  gender   String?
+  ageGroup String?
+
+  keepPosted Boolean?  @default(false)
+  updatedAt  DateTime? @updatedAt
+
+  assessment CandidateAssessment[]
+  details    CandidateDetails?
+
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+}
+
+model CandidateDetails {
+  isFluentInEnglish Boolean?
+  isAbnormal        Boolean?
+
+  highestEducation String?
+  study            String?
+
+  relevant_experience String?
+  yearOfExperience    Int?
+
+  country             String?
+  languageProficiency String?
+  Ethinicity          String?
+
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  candidateId String    @unique
+
+  @@id([candidateId])
+}
+
+enum CandidateStatus {
+  COMPLETED
+  STARTED
+  INVITED
+  REJECTED
+}
+
+model CandidateAssessment {
+  candidates  Candidate @relation(fields: [candidateId], references: [id])
+  candidateId String
+
+  assessments  Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId String
+
+  antiCheatingMonitor AntiCheating? @relation(fields: [antiCheatingId], references: [id])
+  antiCheatingId      String?       @unique
+
+  hiringStage   HiringStage? @relation(fields: [hiringStageId], references: [id])
+  hiringStageId String?      @unique
+
+  invitedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  startedAt   DateTime?
+
+  firstName       String
+  lastName        String
+  invitationToken String?
+
+  status     CandidateStatus     @default(INVITED)
+  score      Float?
+  response   AssessmentResponse? @relation(fields: [responseId], references: [id])
+  responseId String?             @unique
+
+  @@id([candidateId, assessmentId])
+}
+
+model AntiCheating {
+  id                  String               @id @default(uuid())
+  deviceUsed          String?
+  location            String?
+  isOnlyOneIP         Boolean?
+  isWebcamEnabled     Boolean?
+  isAlwaysFullScreen  Boolean?
+  isMouseUser         Boolean?
+  snaps               String[]
+  candidateAssessment CandidateAssessment?
+}
+
+model HiringStage {
+  id    String @id @default(uuid())
+  title String
+
+  CandidateAssessment CandidateAssessment[]
+}
+
+enum FeedbackType {
+  QUESTION
+  ASSESSMENT
+  CANDIDATE
+  TEST
+}
+
+model Feedback {
+  id      String       @id @default(uuid())
+  details String?
+  rating  Int
+  type    FeedbackType
+
+  testAnswer     TestAnswer[]
+  questionAnswer QuestionAnswer[]
+  response       AssessmentResponse[]
+}
+
+model AssessmentResponse {
+  id                  String               @id @default(uuid())
+  candidateAssessment CandidateAssessment?
+  testAnswer          TestAnswer[]
+
+  feedback        Feedback         @relation(fields: [feedbackId], references: [id])
+  feedbackId      String
+  customeQuestion QuestionAnswer[]
+}
+
+model TestAnswer {
+  id    String @id @default(uuid())
+  score Float?
+
+  test   Test   @relation(fields: [testId], references: [id])
+  testId String
+
+  feedback   Feedback? @relation(fields: [feedbackId], references: [id])
+  feedbackId String?
+
+  finishedAt DateTime? @updatedAt
+
+  questionAnswer QuestionAnswer[]
+
+  response   AssessmentResponse @relation(fields: [responseId], references: [id])
+  responseId String
+}
+
+model QuestionAnswer {
+  id     String  @id @default(uuid())
+  answer String?
+
+  question   Question? @relation(fields: [questionId], references: [id])
+  questionId String?
+
+  test         TestAnswer? @relation(fields: [testAnswerId], references: [id])
+  testAnswerId String?
+
+  feedback   Feedback? @relation(fields: [feedbackId], references: [id])
+  feedbackId String?
+
+  response             AssessmentResponse @relation(fields: [assessmentResponseId], references: [id])
+  assessmentResponseId String
+}
