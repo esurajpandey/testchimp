@@ -1,22 +1,21 @@
-### TestChimp Cloned
 
-## TestChimp-Node
+## TestChimp
 
-* TestGorilla provides you with the best tools to filter your candidates so you can make better, faster, and easier hiring decisions
+* TestChimp provides you with the best tools to filter your candidates so you can make better, faster, and easier hiring decisions
 
 # Main Features:
 
 - Create high-quality assessments, fast
   Organize and optimize your assessment by choosing a distinct name and job role.
   Creating a unique and detailed name allows you to easily keep track of assessments.
-  Selecting a job role lets us recommend the most relevant tests. Explore our test library and find the best tests for any job role.Search for specific tests and view test recommendations from us.
-  Click on a test to get an in-depth description and live preview. Video responses from your candidates give unique insight into their personality.
-  Candidates can also answer your custom questions using long-form text, file upload or multiple choice—it's all up to you. Save time by re-using your favorite custom questions from previous assessments.
+- Selecting a job role lets us recommend the most relevant tests. Explore our test library and find the best tests for any job role.Search for specific tests and view test recommendations from us.
+- Click on a test to get an in-depth description and live preview. Video responses from your candidates give unique insight into their personality.
+- Candidates can also answer your custom questions using long-form text, file upload or multiple choice—it's all up to you. Save time by re-using your favorite custom questions from previous assessments.
 - Invite candidates your way
-  Connect with candidates by sending email invites directly from TestGorilla or straight from your ATS.
-  Have a long list of candidates? Easily send multiple invites with a single click. Or have candidates sign up by sharing a direct link
+  Connect with candidates by sending email invites directly from TestChimp or straight from your ATS.
+- Have a long list of candidates? Easily send multiple invites with a single click. Or have candidates sign up by sharing a direct link
 - Analyze and decide on the best candidates
-  Watch the results roll in and discover your strongest candidates with TestGorilla’s easy-to-read output reports.
+- Watch the results roll in and discover your strongest candidates with TestChimp’s easy-to-read output reports.
 
 #### Tech Stack
 
